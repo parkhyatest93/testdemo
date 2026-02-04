@@ -1,0 +1,9 @@
+# Ignore all log files
+*.txt
+*.log
+
+# Ignore cache files
+cache/
+
+# But keep this .gitignore
+!.gitignore

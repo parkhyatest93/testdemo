@@ -1,0 +1,44 @@
+node_modules
+
+/.cache
+/build
+/app/build
+/public/build/
+/app/public/build
+/prisma/data.db
+/prisma/data.db-journaldatabase.sqlite
+/uploads
+/extensions/**/dist/
+/extensions/**/build/
+.shopify/bundle
+
+.env
+*.env.*
+!.env.development
+!.env.production
+!.env.test
+!.env.ci
+
+yarn-error.log
+.terraform.lock.hcl
+
+# Generated GraphQL Types
+/types/admin.generated.d.ts
+/types/admin.schema.json
+/types/admin.types.d.ts
+/graphql/schema.json
+/extensions/**/types/*.generated.d.ts
+/extensions/**/types/*.schema.json
+/extensions/**/types/*.types.d.ts
+
+
+# OS files
+**/.DS_Store
+
+# php-job cache
+php-job/cache/
+php-job/delete/
+php-job/delete/subscription-filter.fixed+renew.php
+php-job/delete/subscription-filter.fixed.php
+php-job/delete/subscription-filter.norenew.php
+php-job/delete/subscription-filter-bk.php

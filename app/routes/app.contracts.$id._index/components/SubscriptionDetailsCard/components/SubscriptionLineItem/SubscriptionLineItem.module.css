@@ -1,0 +1,4 @@
+.WarningTextColor {
+  color: var(--p-color-icon-warning);
+  font-size: var(--p-font-size-300);
+}

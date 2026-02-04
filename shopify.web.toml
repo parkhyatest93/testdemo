@@ -1,0 +1,7 @@
+name = "remix"
+roles = ["frontend","backend"]
+webhooks_path = "/webhooks/cli"
+
+[commands]
+predev = "npx dotenv -c development npm run setup"
+dev = "npx remix vite:dev"
