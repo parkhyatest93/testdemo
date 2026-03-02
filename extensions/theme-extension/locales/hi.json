@@ -1,0 +1,24 @@
+{
+  "product": {
+    "purchase_options": {
+      "one_time_purchase": "एक बार की खरीदी",
+      "subscription": "सब्सक्रिप्शन"
+    }
+  },
+  "policy": {
+    "description": "यह अपने आप रिन्यू हो जाता है, किसी भी समय छोड़ें या रद्द करें।",
+    "policy_page_html": "<a href={{subscription_policy_url}} title='सब्सक्रिप्शन पॉलिसी देखें'>सब्सक्रिप्शन पॉलिसी देखें</a>"
+  },
+  "error": {
+    "quick_add_selling_plan_only_message": "इसे कार्ट में जोड़ने के लिए, उत्पाद पेज पर जाएँ और खरीदारी का कोई विकल्प चुनें"
+  },
+  "no_subscriptions_warning_banner": {
+    "message": "सब्सक्रिप्शन विजेट सिर्फ़ उन्हीं उत्पादों पर दिखाई देगा, जिनसे कोई सब्सक्रिप्शन प्लान जुड़ा होगा।"
+  },
+  "no_app_block_found_banner": {
+    "message": "सब्सक्रिप्शन विजेट की जगह बदलने के लिए, उत्पाद टेंप्लेट में मनचाही जगह पर, नीचे दिया गया कोड स्निपेट जोड़ें।",
+    "copy_button_text": "कॉपी करें",
+    "copied_button_text": "कॉपी किया गया",
+    "button_text": "कोड एडिटर देखें"
+  }
+}

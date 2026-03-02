@@ -1,0 +1,16 @@
+api_version = "2025-07"
+
+[[extensions]]
+uid = "616cac44-d0a2-71df-af0c-ca1793419c703adcchiy"
+type = "ui_extension"
+name = "check-gift-card"
+handle = "check-gift-card"
+
+[[extensions.targeting]]
+module = "./src/index.tsx"
+target = "purchase.checkout.reductions.render-after"
+
+[extensions.capabilities]
+api_access = true
+network_access = true
+block_progress = true

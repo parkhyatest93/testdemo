@@ -1,0 +1,24 @@
+{
+  "product": {
+    "purchase_options": {
+      "one_time_purchase": "Pembelian satu kali",
+      "subscription": "Berlangganan"
+    }
+  },
+  "policy": {
+    "description": "Perbarui otomatis, lewati atau batalkan kapan saja.",
+    "policy_page_html": "<a href={{subscription_policy_url}} title='Lihat kebijakan langganan'>Lihat kebijakan langganan</a>"
+  },
+  "error": {
+    "quick_add_selling_plan_only_message": "Untuk menambahkan ke keranjang, buka halaman produk, lalu pilih opsi pembelian"
+  },
+  "no_subscriptions_warning_banner": {
+    "message": "Widget langganan hanya akan ditampilkan pada produk yang memiliki paket langganan."
+  },
+  "no_app_block_found_banner": {
+    "message": "Untuk mengedit penempatan widget langganan, tambahkan cuplikan kode berikut ke templat produk di tempat yang diinginkan.",
+    "copy_button_text": "Salin",
+    "copied_button_text": "Disalin",
+    "button_text": "Lihat editor kode"
+  }
+}

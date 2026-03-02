@@ -1,8 +1,8 @@
 <?php
 ini_set('max_execution_time', -1);
 
-$shop       = 'scf26q-iq.myshopify.com';
-$accessToken = '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';
+$shop       = 'himanshu-self.myshopify.com';
+ 
 $apiVersion  = '2026-01';
 
 $endpoint = "https://{$shop}/admin/api/{$apiVersion}/graphql.json";

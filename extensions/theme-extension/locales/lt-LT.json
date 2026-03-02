@@ -1,0 +1,24 @@
+{
+  "product": {
+    "purchase_options": {
+      "one_time_purchase": "Vienkartinis pirkinys",
+      "subscription": "Prenumerata"
+    }
+  },
+  "policy": {
+    "description": "Automatinis atnaujinimas, galimybė bet kada praleisti ar atšaukti.",
+    "policy_page_html": "<a href={{subscription_policy_url}} title='Peržiūrėti prenumeravimo politiką'>Peržiūrėti prenumeravimo politiką</a>"
+  },
+  "error": {
+    "quick_add_selling_plan_only_message": "Norėdami pridėti į krepšelį, eikite į prekės puslapį ir pasirinkite pirkimo galimybę"
+  },
+  "no_subscriptions_warning_banner": {
+    "message": "Prenumeratos valdiklis bus rodomas tik prie gaminių, siūlomų kartu su prenumeratos planu."
+  },
+  "no_app_block_found_banner": {
+    "message": "Jei norite redaguoti prenumeratos valdiklio vietą, norimoje gaminio šablono vietoje įklijuokite šį kodo fragmentą.",
+    "copy_button_text": "Kopijuoti",
+    "copied_button_text": "Nukopijuota",
+    "button_text": "Žr. kodo redaktorių"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "product": {
+    "purchase_options": {
+      "one_time_purchase": "Egyszeri vásárlás",
+      "subscription": "Előfizetés"
+    }
+  },
+  "policy": {
+    "description": "Automatikusan megújul, bármikor kihagyhatod és le is mondhatod.",
+    "policy_page_html": "<a href={{subscription_policy_url}} title='Előfizetési szabályzat megtekintése'>Előfizetési szabályzat megtekintése</a>"
+  },
+  "error": {
+    "quick_add_selling_plan_only_message": "Ha hozzá szeretnéd adni a kosaradhoz, menj a termék oldalára, és válassz egy vásárlási lehetőséget."
+  },
+  "no_subscriptions_warning_banner": {
+    "message": "Az előfizetési widget csak azon termékek esetében jelenik meg, amelyekhez előfizetési csomagok tartoznak."
+  },
+  "no_app_block_found_banner": {
+    "message": "Az előfizetési widget helyének szerkesztéséhez add hozzá a következő kódrészletet a terméksablonhoz a kívánt helyen.",
+    "copy_button_text": "Másolás",
+    "copied_button_text": "Másolva",
+    "button_text": "Kódszerkesztő megtekintése"
+  }
+}

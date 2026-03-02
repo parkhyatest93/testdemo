@@ -2,12 +2,13 @@
 
 client_id = "329b7a3eb409ad8714d209eb5c096169"
 name = "customapp"
-application_url = "https://example.com"
+application_url = "https://britannica-obj-qualifications-andrew.trycloudflare.com"
 embedded = true
 
 [build]
-automatically_update_urls_on_dev = true
+auto_update_urls = false 
 include_config_on_deploy = true
+automatically_update_urls_on_dev = true
 
 [webhooks]
 api_version = "2025-07"
@@ -62,7 +63,8 @@ scopes = "read_customers,customer_read_orders,customer_write_customers,customer_
 
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = ["https://britannica-obj-qualifications-andrew.trycloudflare.com/auth/callback", "https://britannica-obj-qualifications-andrew.trycloudflare.com/auth/shopify/callback", "https://britannica-obj-qualifications-andrew.trycloudflare.com/api/auth/callback"]
+
 
 [pos]
 embedded = false

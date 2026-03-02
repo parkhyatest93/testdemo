@@ -1,5 +1,5 @@
 name = "remix"
-roles = ["frontend","backend"]
+roles = ["frontend"]
 webhooks_path = "/webhooks/cli"
 
 [commands]

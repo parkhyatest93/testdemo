@@ -1,0 +1,18 @@
+api_version = "2025-07"
+
+[[extensions]]
+uid = "6982c44-d0a2-71df-af0c-ca1793419c703adcbc88"
+type = "ui_extension"
+name = "disable-discount-box"
+handle = "disable-discount-box"
+
+[[extensions.targeting]]
+module = "./src/index.tsx"
+target = "purchase.checkout.block.render"
+
+[extensions.capabilities]
+api_access = true
+network_access = true
+block_progress = true
+customer_data_access = true
+

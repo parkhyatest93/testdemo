@@ -1,13 +1,13 @@
 import dotenv from 'dotenv';
 import axios from 'axios';
-import cron from 'node-cron';
+import cron from 'node-cron'; 
 
 // بارگذاری اطلاعات از .env
 dotenv.config();
 
-const SHOPIFY_API_URL = 'https://devshop.minimeal.com/admin/api/2025-07/graphql.json';  // تغییر بده
-// const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
-const SHOPIFY_ACCESS_TOKEN = "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";
+const SHOPIFY_API_URL = 'https://himanshu-self.myshopify.com//admin/api/2025-07/graphql.json';  // تغییر بده
+const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
+ 
 
 // کران‌جاب هر 10 دقیقه اجرا می‌شود
 cron.schedule('*/1 * * * *', async () => {
@@ -31,7 +31,7 @@ cron.schedule('*/1 * * * *', async () => {
 
     const response = await axios.post(SHOPIFY_API_URL, { query: contractsQuery }, {
       headers: {
-        'X-Shopify-Storefront-Access-Token': SHOPIFY_ACCESS_TOKEN,
+        'X-Shopify-Access-Token': SHOPIFY_ACCESS_TOKEN,
         'Content-Type': 'application/json'
       }
     });

@@ -1,0 +1,18 @@
+api_version = "2025-07"
+
+[[extensions]]
+uid = "62m2c44-d0a2-71df-af0c-ca1793419c703adcbc88"
+type = "ui_extension"
+name = "stand-alone"
+handle = "stand-alone"
+
+[[extensions.targeting]]
+module = "./src/index.tsx"
+target = "purchase.checkout.block.render"
+
+[extensions.capabilities]
+api_access = true
+network_access = true
+block_progress = true
+customer_data_access = true
+

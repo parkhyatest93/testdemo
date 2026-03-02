@@ -1,0 +1,24 @@
+{
+  "product": {
+    "purchase_options": {
+      "one_time_purchase": "Jednokratna kupnja",
+      "subscription": "Pretplata"
+    }
+  },
+  "policy": {
+    "description": "Automatsko obnavljanje, preskakanje ili otkazivanje dostupni su u svakom trenutku.",
+    "policy_page_html": "<a href={{subscription_policy_url}} title='Prikaži pravila pretplate'>Prikaži pravila pretplate</a>"
+  },
+  "error": {
+    "quick_add_selling_plan_only_message": "Da biste proizvod dodali u košaricu, otvorite stranicu proizvoda i odaberite opciju kupnje"
+  },
+  "no_subscriptions_warning_banner": {
+    "message": "Widget za pretplatu prikazat će se samo za proizvode kojima je priložen plan pretplate."
+  },
+  "no_app_block_found_banner": {
+    "message": "Za uređivanje položaja widgeta za pretplatu dodajte sljedeći isječak koda u predložak proizvoda na željeni položaj.",
+    "copy_button_text": "Kopiraj",
+    "copied_button_text": "Kopirano",
+    "button_text": "Prikaži uređivač koda"
+  }
+}

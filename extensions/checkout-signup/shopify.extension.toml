@@ -1,0 +1,17 @@
+api_version = "2025-07"
+
+[[extensions]]
+uid = "616cac44-d0a2-71df-af0c-ca1793419c703adcbsos"
+type = "ui_extension"
+name = "checkout-signup"
+handle = "checkout-signup"
+
+[[extensions.targeting]]
+module = "./src/index.tsx"
+target = "purchase.checkout.block.render"
+
+[extensions.capabilities]
+api_access = true
+network_access = true
+block_progress = true
+

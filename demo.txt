@@ -1,0 +1,1432 @@
+{%- assign product = all_products[section.settings.product] -%}
+
+{%- assign variant_selector_block = section.blocks | where: 'type', 'variant_selector' | first -%}
+{%- assign buy_buttons_block = section.blocks | where: 'type', 'buy_buttons' | first -%}
+
+{%- capture section_settings -%}
+{
+  "showShippingEstimator": false,
+  "galleryTransitionEffect": {{ section.settings.carousel_effect | json }},
+  "enableImageZoom": {{ section.settings.enable_image_zoom | json }},
+  "zoomEffect": {{ section.settings.zoom_effect | json }},
+  "infoOverflowScroll": false,
+  "productOptions": {{ product.options | json | escape }},
+  "isQuickView": false
+}
+{%- endcapture -%}
+
+<section
+  class="section"
+  data-section-id="{{ section.id }}"
+  data-section-type="product"
+  data-section-settings="{{ section_settings | escape_once }}"
+>
+  <div class="container">
+    {%- if section.settings.title != blank -%}
+      <header class="section__header">
+        <h2 class="section__title heading h3">{{ section.settings.title | escape }}</h2>
+
+        {%- if section.settings.link_title != blank -%}
+          <a
+            href="{{ section.settings.link_url | default: product.url | default: '#' }}"
+            class="section__action-link link"
+          >
+            {{- section.settings.link_title }}
+            {% render 'icon', icon: 'tail-right' -%}
+          </a>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+  </div>
+
+  <div class="{% unless section.settings.full_width %}container container--flush{% endunless %}">
+    {%- capture product_form_id -%}product-form-featured-product-{{ product.id }}-{{ section.id }}{%- endcapture -%}
+
+    <product-rerender
+      id="product-info-{{ product.id }}-{{ section.id }}"
+      observe-form="{{ product_form_id }}"
+      allow-partial-rerender
+    >
+      {%- if section.settings.layout == 'big_slider' -%}
+        <div class="featured-product featured-product--big-slider">
+          <div class="product-gallery-wrapper" style="position: relative;">
+            {%- if product != blank -%}
+              {%- render 'product-gallery', product: product, product_form_id: product_form_id -%}
+            {%- else -%}
+              <div class="product-gallery">
+                <div class="product-gallery__carousel-wrapper">
+                  <div
+                    class="product-gallery__carousel {% if section.settings.enable_image_zoom %}product-gallery__carousel--zoomable{% endif %}"
+                    data-image-count="1"
+                  >
+                    <div class="product-gallery__carousel-item is-selected">
+                      {{ 'product-1' | placeholder_svg_tag }}
+                    </div>
+                  </div>
+
+                  {%- if section.settings.enable_image_zoom -%}
+                    <button class="product-gallery__zoom-notice link">
+                      {% render 'icon', icon: 'zoom' %}
+                      {{ 'product.general.zoom' | t }}
+                    </button>
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endif -%}
+            {%- if section.settings.cta_text != blank -%}
+              <div
+                class="product-gallery__overlay"
+                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;"
+              >
+                <a href="{{ product.url | default: '#' }}" class="button button--primary">
+                  {{- section.settings.cta_text -}}
+                </a>
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- else -%}
+        <div class="featured-product media-position--{{ section.settings.media_position | default: 'left' }}">
+          {%- if product != blank -%}
+            {%- if section.settings.media_position == 'right' -%}
+              {%- render 'product-info', product: product, product_form_id: product_form_id -%}
+              {%- render 'product-gallery', product: product, product_form_id: product_form_id -%}
+            {%- else -%}
+              {%- render 'product-gallery', product: product, product_form_id: product_form_id -%}
+              {%- render 'product-info', product: product, product_form_id: product_form_id -%}
+            {%- endif -%}
+          {%- else -%}
+            {%- if section.settings.media_position == 'right' -%}
+              <div class="card card--collapsed">
+                <div class="card__section">
+                  <div class="product-info">
+                    {%- for block in section.blocks -%}
+                      {%- case block.type -%}
+                        {%- when 'product_meta' -%}
+                          {%- if block.settings.show_share_buttons -%}
+                            {%- capture share_buttons -%}
+                              <ul class="social-media__item-list list--unstyled" role="list">
+                                <li class="social-media__item social-media__item--facebook"><a href="#" target="_blank" rel="noopener" aria-label="{{ 'general.social.facebook_share' | t }}">{%- render 'icon', icon: 'facebook' -%}</a></li>
+                                <li class="social-media__item social-media__item--pinterest"><a href="#" target="_blank" rel="noopener" aria-label="{{ 'general.social.pinterest_pin' | t }}">{%- render 'icon', icon: 'pinterest' -%}</a></li>
+                                <li class="social-media__item social-media__item--twitter"><a href="#" target="_blank" rel="noopener" aria-label="{{ 'general.social.twitter_tweet' | t }}">{%- render 'icon', icon: 'twitter' -%}</a></li>
+                                <li class="social-media__item"><a href="#" target="_blank" rel="noopener" aria-label="{{ 'general.social.email_share' | t }}">{%- render 'icon', icon: 'email' -%}</a></li>
+                              </ul>
+                            {%- endcapture -%}
+                          {%- endif -%}
+
+                          <div class="product-meta">
+                            <h3 class="product-meta__title heading h2">
+                              {{ 'home_page.onboarding.product_title' | t }}
+                            </h3>
+
+                            {%- if block.settings.show_vendor or block.settings.show_sku -%}
+                              <div class="product-meta__reference">
+                                {%- if block.settings.show_vendor -%}
+                                  <a class="product-meta__vendor link link--accented" href="#">
+                                    {{- 'home_page.onboarding.vendor_title' | t -}}
+                                  </a>
+                                {%- endif -%}
+
+                                {%- if block.settings.show_sku -%}
+                                  <span class="product-meta__sku">{{ 'home_page.onboarding.product_sku' | t }}</span>
+                                {%- endif -%}
+                              </div>
+                            {%- endif -%}
+
+                            {%- if block.settings.show_share_buttons -%}
+                              <div class="product-meta__share-buttons hidden-phone">
+                                {{ share_buttons }}
+                              </div>
+                            {%- endif -%}
+                          </div>
+
+                          <hr class="card__separator">
+
+                        {%- when 'featured_description' -%}
+                          <div class="product-meta__description rte">
+                            {{ 'home_page.onboarding.product_description' | t }}
+                          </div>
+
+                        {%- when 'variant_selector' -%}
+                          <div class="product-form__info-list">
+                            <div class="product-form__info-item">
+                              <span class="product-form__info-title text--strong">{{ 'product.form.price' | t }}:</span>
+
+                              <div class="product-form__info-content">
+                                <div class="price-list">
+                                  <span class="price">{{ 4000 | money }}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {%- if block.settings.show_inventory_quantity -%}
+                              <div class="product-form__info-item">
+                                <span class="product-form__info-title text--strong">
+                                  {{- 'product.form.inventory' | t }}:</span
+                                >
+
+                                <div class="product-form__info-content">
+                                  <span class="product-form__inventory inventory inventory--high">
+                                    {{- 'product.form.in_stock' | t -}}
+                                  </span>
+                                </div>
+                              </div>
+                            {%- endif -%}
+
+                            {%- if block.settings.show_quantity_selector -%}
+                              <div class="product-form__info-item product-form__info-item--quantity">
+                                <label for="{{ section.id }}-quantity" class="product-form__info-title text--strong">
+                                  {{- 'product.form.quantity' | t }}:</label
+                                >
+
+                                <div class="product-form__info-content">
+                                  <quantity-picker class="quantity-selector quantity-selector--product">
+                                    <button
+                                      type="button"
+                                      class="quantity-selector__button"
+                                      data-action="decrease-picker-quantity"
+                                      aria-label="{{ 'cart.items.decrease_quantity' | t }}"
+                                      title="{{ 'cart.items.decrease_quantity' | t }}"
+                                    >
+                                      {% render 'icon', icon: 'minus' %}
+                                    </button>
+                                    <input
+                                      name="quantity"
+                                      aria-label="{{ 'product.form.quantity' | t }}"
+                                      class="quantity-selector__value"
+                                      inputmode="numeric"
+                                      value="1"
+                                      size="3"
+                                    >
+                                    <button
+                                      type="button"
+                                      class="quantity-selector__button"
+                                      data-action="increase-picker-quantity"
+                                      aria-label="{{ 'cart.items.increase_quantity' | t }}"
+                                      title="{{ 'cart.items.increase_quantity' | t }}"
+                                    >
+                                      {% render 'icon', icon: 'plus' %}
+                                    </button>
+                                  </quantity-picker>
+                                </div>
+                              </div>
+                            {%- endif -%}
+                          </div>
+
+                        {%- when 'ttco_before_after' -%}
+                          <div class="product-block-ttco-ba" {{ block.shopify_attributes }}>
+                            {%- liquid
+                              assign before_image = product.metafields.ttco.before_image.value
+                              assign after_image = product.metafields.ttco.after_image.value
+                              assign before_label = product.metafields.ttco.before_label.value | default: block.settings.before_label_fallback
+                              assign after_label = product.metafields.ttco.after_label.value | default: block.settings.after_label_fallback
+                              assign start_position = block.settings.start_position | default: 50
+                              assign aspect_ratio = block.settings.aspect_ratio | default: 'landscape'
+                              assign object_fit = block.settings.object_fit | default: 'cover'
+                              assign block_id = 'ttco-ba-block-' | append: section.id | append: '-' | append: block.id
+                            -%}
+
+                            {%- if before_image == blank or after_image == blank -%}
+                              {%- if request.design_mode -%}
+                                <div class="ttco-ba-placeholder-block">
+                                  <p><strong>Before/After Slider:</strong> add product metafields:</p>
+                                  <p style="font-size: 0.875em;">
+                                    <code>ttco.before_image</code> and <code>ttco.after_image</code>
+                                  </p>
+                                </div>
+                              {%- endif -%}
+                            {%- else -%}
+                              <div
+                                class="ttco-ba-container-block"
+                                id="{{ block_id }}"
+                                data-aspect="{{ aspect_ratio }}"
+                                style="--ttco-pos: {{ start_position }}%;"
+                              >
+                                <div class="ttco-ba-image-wrapper ttco-ba-before">
+                                  {{-
+                                    before_image
+                                    | image_url: width: 1400
+                                    | image_tag:
+                                      loading: 'lazy',
+                                      widths: '375, 550, 750, 1100, 1400',
+                                      class: 'ttco-ba-img',
+                                      alt: before_label
+                                    | default: 'Before image', style: 'object-fit: '
+                                    | append: object_fit
+                                  -}}
+                                  {%- if before_label != blank -%}
+                                    <span class="ttco-ba-label ttco-ba-label-before">{{ before_label }}</span>
+                                  {%- endif -%}
+                                </div>
+
+                                <div
+                                  class="ttco-ba-image-wrapper ttco-ba-after"
+                                  style="clip-path: inset(0 {{ 100 | minus: start_position }}% 0 0);"
+                                >
+                                  {{-
+                                    after_image
+                                    | image_url: width: 1400
+                                    | image_tag:
+                                      loading: 'lazy',
+                                      widths: '375, 550, 750, 1100, 1400',
+                                      class: 'ttco-ba-img',
+                                      alt: after_label
+                                    | default: 'After image', style: 'object-fit: '
+                                    | append: object_fit
+                                  -}}
+                                  {%- if after_label != blank -%}
+                                    <span class="ttco-ba-label ttco-ba-label-after">{{ after_label }}</span>
+                                  {%- endif -%}
+                                </div>
+
+                                <div class="ttco-ba-divider" aria-hidden="true">
+                                  <div class="ttco-ba-handle" aria-hidden="true">
+                                    <svg
+                                      width="24"
+                                      height="24"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke-width="1.5"
+                                      stroke="currentColor"
+                                      class="w-4 h-4"
+                                    >
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"></path>
+                                    </svg>
+                                  </div>
+                                </div>
+
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="100"
+                                  value="{{ start_position }}"
+                                  class="ttco-ba-slider"
+                                  aria-label="Adjust before and after comparison. {{ before_label | default: 'Before' }} on left, {{ after_label | default: 'After' }} on right."
+                                >
+                              </div>
+
+                              <style>
+                                .product-block-ttco-ba { margin: 1.5rem 0; }
+
+                                .ttco-ba-placeholder-block {
+                                  background: #f7f7f7;
+                                  border: 2px dashed #ccc;
+                                  border-radius: 8px;
+                                  padding: 2rem 1rem;
+                                  text-align: center;
+                                  color: #666;
+                                  font-size: 0.875rem;
+                                }
+                                .ttco-ba-placeholder-block code {
+                                  background: #fff;
+                                  padding: 0.125rem 0.375rem;
+                                  border-radius: 3px;
+                                }
+
+                                .ttco-ba-container-block {
+                                  position: relative;
+                                  overflow: hidden;
+                                  border-radius: 8px;
+                                  background: #000;
+                                  touch-action: pan-y pinch-zoom;
+                                  user-select: none;
+                                  -webkit-user-select: none;
+                                  cursor: ew-resize;
+                                }
+
+                                .ttco-ba-container-block[data-aspect="square"] { aspect-ratio: 1 / 1; }
+                                .ttco-ba-container-block[data-aspect="landscape"] { aspect-ratio: 4 / 3; }
+                                .ttco-ba-container-block[data-aspect="portrait"] { aspect-ratio: 3 / 4; }
+                                .ttco-ba-container-block[data-aspect="original"] { }
+
+                                .ttco-ba-image-wrapper {
+                                  position: absolute;
+                                  top: 0; left: 0;
+                                  width: 100%;
+                                  height: 100%;
+                                }
+                                .ttco-ba-before { z-index: 1; }
+                                .ttco-ba-after { z-index: 2; }
+
+                                .ttco-ba-img { width: 100%; height: 100%; display: block; }
+
+                                .ttco-ba-label {
+                                  position: absolute;
+                                  top: 1rem;
+                                  padding: 0.375rem 0.75rem;
+                                  background: rgba(0, 0, 0, 0.7);
+                                  color: #fff;
+                                  font-size: 0.875rem;
+                                  font-weight: 600;
+                                  border-radius: 4px;
+                                  text-transform: uppercase;
+                                  letter-spacing: 0.05em;
+                                  pointer-events: none;
+                                }
+                                .ttco-ba-label-before { left: 1rem; }
+                                .ttco-ba-label-after { right: 1rem; }
+
+                                .ttco-ba-divider {
+                                  position: absolute;
+                                  top: 0;
+                                  left: var(--ttco-pos);
+                                  width: 3px;
+                                  height: 100%;
+                                  background: #fff;
+                                  z-index: 3;
+                                  transform: translateX(-50%);
+                                  pointer-events: none;
+                                  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+                                }
+
+                                .ttco-ba-handle {
+                                  position: absolute;
+                                  top: 50%;
+                                  left: 50%;
+                                  transform: translate(-50%, -50%);
+                                  width: 48px;
+                                  height: 48px;
+                                  background: #fff;
+                                  border-radius: 50%;
+                                  display: flex;
+                                  align-items: center;
+                                  justify-content: center;
+                                  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+                                  color: #333;
+                                }
+
+                                .ttco-ba-slider {
+                                  position: absolute;
+                                  inset: 0;
+                                  width: 100%;
+                                  height: 100%;
+                                  opacity: 0;
+                                  z-index: 4;
+                                  cursor: ew-resize;
+                                  margin: 0;
+                                }
+
+                                .ttco-ba-slider:focus {
+                                  outline: 3px solid #005fcc;
+                                  outline-offset: 2px;
+                                  opacity: 0.01;
+                                }
+
+
+                                @media (max-width: 749px) {
+                                  .ttco-ba-label {
+                                    font-size: 0.75rem;
+                                    padding: 0.25rem 0.5rem;
+                                    top: 0.5rem;
+                                  }
+                                  .ttco-ba-label-before { left: 0.5rem; }
+                                  .ttco-ba-label-after { right: 0.5rem; }
+                                }
+                              </style>
+
+                              <script>
+                              (function() {
+                                const container = document.getElementById('{{ block_id }}');
+                                if (!container) return;
+
+                                const slider = container.querySelector('.ttco-ba-slider');
+                                const afterLayer = container.querySelector('.ttco-ba-after');
+                                const divider = container.querySelector('.ttco-ba-divider');
+
+                                let isDragging = false;
+
+                                function updatePosition(percent) {
+                                  percent = Math.max(0, Math.min(100, percent));
+                                  const rightClip = 100 - percent;
+                                  afterLayer.style.clipPath = `inset(0 ${rightClip}% 0 0)`;
+                                  divider.style.left = `${percent}%`;
+                                  container.style.setProperty('--ttco-pos', `${percent}%`);
+                                  slider.value = percent;
+                                }
+
+                                function getPercentFromEvent(e) {
+                                  const rect = container.getBoundingClientRect();
+                                  const clientX = (e.type && e.type.indexOf('touch') !== -1)
+                                    ? e.touches[0].clientX
+                                    : e.clientX;
+                                  const x = clientX - rect.left;
+                                  return (x / rect.width) * 100;
+                                }
+
+                                slider.addEventListener('input', function(e) {
+                                  updatePosition(parseFloat(e.target.value));
+                                });
+
+                                container.addEventListener('mousedown', function(e) {
+                                  isDragging = true;
+                                  updatePosition(getPercentFromEvent(e));
+                                });
+
+                                document.addEventListener('mousemove', function(e) {
+                                  if (!isDragging) return;
+                                  if (e.cancelable) e.preventDefault();
+                                  updatePosition(getPercentFromEvent(e));
+                                });
+
+                                document.addEventListener('mouseup', function() {
+                                  isDragging = false;
+                                });
+
+                                container.addEventListener('touchstart', function(e) {
+                                  isDragging = true;
+                                  updatePosition(getPercentFromEvent(e));
+                                }, { passive: true });
+
+                                container.addEventListener('touchmove', function(e) {
+                                  if (!isDragging) return;
+                                  updatePosition(getPercentFromEvent(e));
+                                }, { passive: true });
+
+                                container.addEventListener('touchend', function() {
+                                  isDragging = false;
+                                }, { passive: true });
+
+                                updatePosition({{ start_position }});
+                              })();
+                              </script>
+                            {%- endif -%}
+                          </div>
+
+                        {%- when 'buy_buttons' -%}
+                          <div class="product-form__payment-container">
+                            <button type="submit" class="product-form__add-button button button--primary">
+                              {{ 'product.form.add_to_cart' | t }}
+                            </button>
+
+                            {%- if section.settings.show_payment_button -%}
+                              {{ form | payment_button }}
+                            {%- endif -%}
+                          </div>
+                      {%- endcase -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card__section">
+                  <div class="product-gallery">
+                    <div class="product-gallery__carousel-wrapper">
+                      <div
+                        class="product-gallery__carousel {% if section.settings.enable_image_zoom %}product-gallery__carousel--zoomable{% endif %}"
+                        data-image-count="1"
+                      >
+                        <div class="product-gallery__carousel-item is-selected">
+                          {{ 'product-1' | placeholder_svg_tag }}
+                        </div>
+                      </div>
+
+                      {%- if section.settings.enable_image_zoom -%}
+                        <button class="product-gallery__zoom-notice link">
+                          {% render 'icon', icon: 'zoom' %}
+                          {{ 'product.general.zoom' | t }}
+                        </button>
+                      {%- endif -%}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {%- else -%}
+              <div class="card">
+                <div class="card__section">
+                  <div class="product-gallery">
+                    <div class="product-gallery__carousel-wrapper">
+                      <div
+                        class="product-gallery__carousel {% if section.settings.enable_image_zoom %}product-gallery__carousel--zoomable{% endif %}"
+                        data-image-count="1"
+                      >
+                        <div class="product-gallery__carousel-item is-selected">
+                          {{ 'product-1' | placeholder_svg_tag }}
+                        </div>
+                      </div>
+
+                      {%- if section.settings.enable_image_zoom -%}
+                        <button class="product-gallery__zoom-notice link">
+                          {% render 'icon', icon: 'zoom' %}
+                          {{ 'product.general.zoom' | t }}
+                        </button>
+                      {%- endif -%}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card card--collapsed">
+                <div class="card__section">
+                  <div class="product-info">
+                    {%- for block in section.blocks -%}
+                      {%- case block.type -%}
+                        {%- when 'product_meta' -%}
+                          {%- if block.settings.show_share_buttons -%}
+                            {%- capture share_buttons -%}
+                              <ul class="social-media__item-list list--unstyled" role="list">
+                                <li class="social-media__item social-media__item--facebook"><a href="#" target="_blank" rel="noopener" aria-label="{{ 'general.social.facebook_share' | t }}">{%- render 'icon', icon: 'facebook' -%}</a></li>
+                                <li class="social-media__item social-media__item--pinterest"><a href="#" target="_blank" rel="noopener" aria-label="{{ 'general.social.pinterest_pin' | t }}">{%- render 'icon', icon: 'pinterest' -%}</a></li>
+                                <li class="social-media__item social-media__item--twitter"><a href="#" target="_blank" rel="noopener" aria-label="{{ 'general.social.twitter_tweet' | t }}">{%- render 'icon', icon: 'twitter' -%}</a></li>
+                                <li class="social-media__item"><a href="#" target="_blank" rel="noopener" aria-label="{{ 'general.social.email_share' | t }}">{%- render 'icon', icon: 'email' -%}</a></li>
+                              </ul>
+                            {%- endcapture -%}
+                          {%- endif -%}
+
+                          <div class="product-meta">
+                            <h3 class="product-meta__title heading h2">
+                              {{ 'home_page.onboarding.product_title' | t }}
+                            </h3>
+
+                            {%- if block.settings.show_vendor or block.settings.show_sku -%}
+                              <div class="product-meta__reference">
+                                {%- if block.settings.show_vendor -%}
+                                  <a class="product-meta__vendor link link--accented" href="#">
+                                    {{- 'home_page.onboarding.vendor_title' | t -}}
+                                  </a>
+                                {%- endif -%}
+
+                                {%- if block.settings.show_sku -%}
+                                  <span class="product-meta__sku">{{ 'home_page.onboarding.product_sku' | t }}</span>
+                                {%- endif -%}
+                              </div>
+                            {%- endif -%}
+
+                            {%- if block.settings.show_share_buttons -%}
+                              <div class="product-meta__share-buttons hidden-phone">
+                                {{ share_buttons }}
+                              </div>
+                            {%- endif -%}
+                          </div>
+
+                          <hr class="card__separator">
+
+                        {%- when 'featured_description' -%}
+                          <div class="product-meta__description rte">
+                            {{ 'home_page.onboarding.product_description' | t }}
+                          </div>
+
+                        {%- when 'variant_selector' -%}
+                          <div class="product-form__info-list">
+                            <div class="product-form__info-item">
+                              <span class="product-form__info-title text--strong">{{ 'product.form.price' | t }}:</span>
+
+                              <div class="product-form__info-content">
+                                <div class="price-list">
+                                  <span class="price">{{ 4000 | money }}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {%- if block.settings.show_inventory_quantity -%}
+                              <div class="product-form__info-item">
+                                <span class="product-form__info-title text--strong">
+                                  {{- 'product.form.inventory' | t }}:</span
+                                >
+
+                                <div class="product-form__info-content">
+                                  <span class="product-form__inventory inventory inventory--high">
+                                    {{- 'product.form.in_stock' | t -}}
+                                  </span>
+                                </div>
+                              </div>
+                            {%- endif -%}
+
+                            {%- if block.settings.show_quantity_selector -%}
+                              <div class="product-form__info-item product-form__info-item--quantity">
+                                <label for="{{ section.id }}-quantity" class="product-form__info-title text--strong">
+                                  {{- 'product.form.quantity' | t }}:</label
+                                >
+
+                                <div class="product-form__info-content">
+                                  <quantity-picker class="quantity-selector quantity-selector--product">
+                                    <button
+                                      type="button"
+                                      class="quantity-selector__button"
+                                      data-action="decrease-picker-quantity"
+                                      aria-label="{{ 'cart.items.decrease_quantity' | t }}"
+                                      title="{{ 'cart.items.decrease_quantity' | t }}"
+                                    >
+                                      {% render 'icon', icon: 'minus' %}
+                                    </button>
+                                    <input
+                                      name="quantity"
+                                      aria-label="{{ 'product.form.quantity' | t }}"
+                                      class="quantity-selector__value"
+                                      inputmode="numeric"
+                                      value="1"
+                                      size="3"
+                                    >
+                                    <button
+                                      type="button"
+                                      class="quantity-selector__button"
+                                      data-action="increase-picker-quantity"
+                                      aria-label="{{ 'cart.items.increase_quantity' | t }}"
+                                      title="{{ 'cart.items.increase_quantity' | t }}"
+                                    >
+                                      {% render 'icon', icon: 'plus' %}
+                                    </button>
+                                  </quantity-picker>
+                                </div>
+                              </div>
+                            {%- endif -%}
+                          </div>
+
+                        {%- when 'ttco_before_after' -%}
+                          <div class="product-block-ttco-ba" {{ block.shopify_attributes }}>
+                            {%- liquid
+                              assign before_image = product.metafields.ttco.before_image.value
+                              assign after_image = product.metafields.ttco.after_image.value
+                              assign before_label = product.metafields.ttco.before_label.value | default: block.settings.before_label_fallback
+                              assign after_label = product.metafields.ttco.after_label.value | default: block.settings.after_label_fallback
+                              assign start_position = block.settings.start_position | default: 50
+                              assign aspect_ratio = block.settings.aspect_ratio | default: 'landscape'
+                              assign object_fit = block.settings.object_fit | default: 'cover'
+                              assign block_id = 'ttco-ba-block-' | append: section.id | append: '-' | append: block.id
+                            -%}
+
+                            {%- if before_image == blank or after_image == blank -%}
+                              {%- if request.design_mode -%}
+                                <div class="ttco-ba-placeholder-block">
+                                  <p><strong>Before/After Slider:</strong> add product metafields:</p>
+                                  <p style="font-size: 0.875em;">
+                                    <code>ttco.before_image</code> and <code>ttco.after_image</code>
+                                  </p>
+                                </div>
+                              {%- endif -%}
+                            {%- else -%}
+                              <div
+                                class="ttco-ba-container-block"
+                                id="{{ block_id }}"
+                                data-aspect="{{ aspect_ratio }}"
+                                style="--ttco-pos: {{ start_position }}%;"
+                              >
+                                <div class="ttco-ba-image-wrapper ttco-ba-before">
+                                  {{-
+                                    before_image
+                                    | image_url: width: 1400
+                                    | image_tag:
+                                      loading: 'lazy',
+                                      widths: '375, 550, 750, 1100, 1400',
+                                      class: 'ttco-ba-img',
+                                      alt: before_label
+                                    | default: 'Before image', style: 'object-fit: '
+                                    | append: object_fit
+                                  -}}
+                                  {%- if before_label != blank -%}
+                                    <span class="ttco-ba-label ttco-ba-label-before">{{ before_label }}</span>
+                                  {%- endif -%}
+                                </div>
+
+                                <div
+                                  class="ttco-ba-image-wrapper ttco-ba-after"
+                                  style="clip-path: inset(0 {{ 100 | minus: start_position }}% 0 0);"
+                                >
+                                  {{-
+                                    after_image
+                                    | image_url: width: 1400
+                                    | image_tag:
+                                      loading: 'lazy',
+                                      widths: '375, 550, 750, 1100, 1400',
+                                      class: 'ttco-ba-img',
+                                      alt: after_label
+                                    | default: 'After image', style: 'object-fit: '
+                                    | append: object_fit
+                                  -}}
+                                  {%- if after_label != blank -%}
+                                    <span class="ttco-ba-label ttco-ba-label-after">{{ after_label }}</span>
+                                  {%- endif -%}
+                                </div>
+
+                                <div class="ttco-ba-divider" aria-hidden="true">
+                                  <div class="ttco-ba-handle" aria-hidden="true">
+                                    <svg
+                                      width="24"
+                                      height="24"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke-width="1.5"
+                                      stroke="currentColor"
+                                      class="w-4 h-4"
+                                    >
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"></path>
+                                    </svg>
+                                  </div>
+                                </div>
+
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="100"
+                                  value="{{ start_position }}"
+                                  class="ttco-ba-slider"
+                                  aria-label="Adjust before and after comparison. {{ before_label | default: 'Before' }} on left, {{ after_label | default: 'After' }} on right."
+                                >
+                              </div>
+
+                              <style>
+                                .product-block-ttco-ba { margin: 1.5rem 0; }
+
+                                .ttco-ba-placeholder-block {
+                                  background: #f7f7f7;
+                                  border: 2px dashed #ccc;
+                                  border-radius: 8px;
+                                  padding: 2rem 1rem;
+                                  text-align: center;
+                                  color: #666;
+                                  font-size: 0.875rem;
+                                }
+                                .ttco-ba-placeholder-block code {
+                                  background: #fff;
+                                  padding: 0.125rem 0.375rem;
+                                  border-radius: 3px;
+                                }
+
+                                .ttco-ba-container-block {
+                                  position: relative;
+                                  overflow: hidden;
+                                  border-radius: 8px;
+                                  background: #000;
+                                  touch-action: pan-y pinch-zoom;
+                                  user-select: none;
+                                  -webkit-user-select: none;
+                                  cursor: ew-resize;
+                                }
+
+                                .ttco-ba-container-block[data-aspect="square"] { aspect-ratio: 1 / 1; }
+                                .ttco-ba-container-block[data-aspect="landscape"] { aspect-ratio: 4 / 3; }
+                                .ttco-ba-container-block[data-aspect="portrait"] { aspect-ratio: 3 / 4; }
+                                .ttco-ba-container-block[data-aspect="original"] { }
+
+                                .ttco-ba-image-wrapper {
+                                  position: absolute;
+                                  top: 0; left: 0;
+                                  width: 100%;
+                                  height: 100%;
+                                }
+                                .ttco-ba-before { z-index: 1; }
+                                .ttco-ba-after { z-index: 2; }
+
+                                .ttco-ba-img { width: 100%; height: 100%; display: block; }
+
+                                .ttco-ba-label {
+                                  position: absolute;
+                                  top: 1rem;
+                                  padding: 0.375rem 0.75rem;
+                                  background: rgba(0, 0, 0, 0.7);
+                                  color: #fff;
+                                  font-size: 0.875rem;
+                                  font-weight: 600;
+                                  border-radius: 4px;
+                                  text-transform: uppercase;
+                                  letter-spacing: 0.05em;
+                                  pointer-events: none;
+                                }
+                                .ttco-ba-label-before { left: 1rem; }
+                                .ttco-ba-label-after { right: 1rem; }
+
+                                .ttco-ba-divider {
+                                  position: absolute;
+                                  top: 0;
+                                  left: var(--ttco-pos);
+                                  width: 3px;
+                                  height: 100%;
+                                  background: #fff;
+                                  z-index: 3;
+                                  transform: translateX(-50%);
+                                  pointer-events: none;
+                                  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+                                }
+
+                                .ttco-ba-handle {
+                                  position: absolute;
+                                  top: 50%;
+                                  left: 50%;
+                                  transform: translate(-50%, -50%);
+                                  width: 48px;
+                                  height: 48px;
+                                  background: #fff;
+                                  border-radius: 50%;
+                                  display: flex;
+                                  align-items: center;
+                                  justify-content: center;
+                                  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+                                  color: #333;
+                                }
+
+                                .ttco-ba-slider {
+                                  position: absolute;
+                                  inset: 0;
+                                  width: 100%;
+                                  height: 100%;
+                                  opacity: 0;
+                                  z-index: 4;
+                                  cursor: ew-resize;
+                                  margin: 0;
+                                }
+
+                                .ttco-ba-slider:focus {
+                                  outline: 3px solid #005fcc;
+                                  outline-offset: 2px;
+                                  opacity: 0.01;
+                                }
+
+                                @media (max-width: 749px) {
+                                  .ttco-ba-label {
+                                    font-size: 0.75rem;
+                                    padding: 0.25rem 0.5rem;
+                                    top: 0.5rem;
+                                  }
+                                  .ttco-ba-label-before { left: 0.5rem; }
+                                  .ttco-ba-label-after { right: 0.5rem; }
+                                }
+                              </style>
+
+                              <script>
+                              (function() {
+                                const container = document.getElementById('{{ block_id }}');
+                                if (!container) return;
+
+                                const slider = container.querySelector('.ttco-ba-slider');
+                                const afterLayer = container.querySelector('.ttco-ba-after');
+                                const divider = container.querySelector('.ttco-ba-divider');
+
+                                let isDragging = false;
+
+                                function updatePosition(percent) {
+                                  percent = Math.max(0, Math.min(100, percent));
+                                  const rightClip = 100 - percent;
+                                  afterLayer.style.clipPath = `inset(0 ${rightClip}% 0 0)`;
+                                  divider.style.left = `${percent}%`;
+                                  container.style.setProperty('--ttco-pos', `${percent}%`);
+                                  slider.value = percent;
+                                }
+
+                                function getPercentFromEvent(e) {
+                                  const rect = container.getBoundingClientRect();
+                                  const clientX = (e.type && e.type.indexOf('touch') !== -1)
+                                    ? e.touches[0].clientX
+                                    : e.clientX;
+                                  const x = clientX - rect.left;
+                                  return (x / rect.width) * 100;
+                                }
+
+                                slider.addEventListener('input', function(e) {
+                                  updatePosition(parseFloat(e.target.value));
+                                });
+
+                                container.addEventListener('mousedown', function(e) {
+                                  isDragging = true;
+                                  updatePosition(getPercentFromEvent(e));
+                                });
+
+                                document.addEventListener('mousemove', function(e) {
+                                  if (!isDragging) return;
+                                  if (e.cancelable) e.preventDefault();
+                                  updatePosition(getPercentFromEvent(e));
+                                });
+
+                                document.addEventListener('mouseup', function() {
+                                  isDragging = false;
+                                });
+
+                                container.addEventListener('touchstart', function(e) {
+                                  isDragging = true;
+                                  updatePosition(getPercentFromEvent(e));
+                                }, { passive: true });
+
+                                container.addEventListener('touchmove', function(e) {
+                                  if (!isDragging) return;
+                                  updatePosition(getPercentFromEvent(e));
+                                }, { passive: true });
+
+                                container.addEventListener('touchend', function() {
+                                  isDragging = false;
+                                }, { passive: true });
+
+                                updatePosition({{ start_position }});
+                              })();
+                              </script>
+                            {%- endif -%}
+                          </div>
+
+                        {%- when 'buy_buttons' -%}
+                          <div class="product-form__payment-container">
+                            <button type="submit" class="product-form__add-button button button--primary">
+                              {{ 'product.form.add_to_cart' | t }}
+                            </button>
+
+                            {%- if section.settings.show_payment_button -%}
+                              {{ form | payment_button }}
+                            {%- endif -%}
+                          </div>
+                      {%- endcase -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </product-rerender>
+  </div>
+
+  {%- if product != blank -%}
+    <script>
+      window.ShopifyXR=window.ShopifyXR||function(){(ShopifyXR.q=ShopifyXR.q||[]).push(arguments)};
+      ShopifyXR('addModels', {{ product.media | where: 'media_type', 'model' | json }});
+    </script>
+  {%- endif -%}
+</section>
+{% schema %}
+{
+  "name": "Featured product",
+  "blocks": [
+    {
+      "type": "product_meta",
+      "name": "Product meta",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_vendor",
+          "label": "Show vendor",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_sku",
+          "label": "Show SKU",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_reviews_badge",
+          "label": "Show product rating",
+          "info": "To display a rating, add a product rating app. [Learn more](https://help.shopify.com/en/manual/products/product-reviews/installation)",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_share_buttons",
+          "label": "Show share buttons",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "variant_selector",
+      "name": "Variant selector",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "selector_mode",
+          "label": "Selector type",
+          "options": [
+            {
+              "value": "block",
+              "label": "Block"
+            },
+            {
+              "value": "dropdown",
+              "label": "Dropdown"
+            }
+          ],
+          "default": "block"
+        },
+        {
+          "type": "select",
+          "id": "color_mode",
+          "label": "Color selector type",
+          "info": "Enable [swatches](https://help.shopify.com/en/manual/online-store/themes/theme-structure/theme-settings#options-with-swatches) on product options.",
+          "options": [
+            {
+              "value": "swatch",
+              "label": "Swatch"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            }
+          ],
+          "default": "swatch"
+        },
+        {
+          "type": "text",
+          "id": "variant_image_options",
+          "label": "Show variant image for options"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_quantity_selector",
+          "label": "Show quantity selector",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_taxes_included",
+          "label": "Show price taxes notice",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Inventory"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_inventory_quantity",
+          "label": "Show inventory quantity",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "low_inventory_threshold",
+          "label": "Low inventory threshold",
+          "info": "Use low stock color when quantity is below the threshold. Choose 0 to always show in stock.",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "number",
+          "id": "progress_bar_max_value",
+          "label": "Progress bar max value",
+          "info": "Advancement is calculated according to this value.",
+          "default": 50
+        }
+      ]
+    },
+    {
+      "type": "volume_pricing",
+      "name": "Volume pricing table",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Volume pricing is only available to Shopify Plus merchants. [Learn more](https://help.shopify.com/en/manual/b2b/catalogs/quantity-pricing#volume-pricing)"
+        }
+      ]
+    },
+    {
+      "type": "buy_buttons",
+      "name": "Buy buttons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_payment_button",
+          "label": "Show dynamic checkout button",
+          "info": "Each customer will see their preferred payment method from those available on your store, such as PayPal or Apple Pay. [Learn more](https://help.shopify.com/manual/using-themes/change-the-layout/dynamic-checkout)",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_gift_card_recipient",
+          "label": "Show recipient information form for gift card products",
+          "info": "Gift card products can optionally be sent directly to a recipient along with a personal message. [Learn more](https://help.shopify.com/manual/online-store/themes/customizing-themes/add-gift-card-recipient-fields)",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "This text will appear on the right part of the page."
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Text"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "This button will appear on the right part of the page."
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    },
+    {
+      "type": "store_pickup",
+      "name": "Local pickup availability",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Show customers where they can pick up the product. [Learn more](https://help.shopify.com/en/manual/shipping/setting-up-and-managing-your-shipping/local-methods/local-pickup#show-pickup-availability-to-your-customers)"
+        }
+      ]
+    },
+    {
+      "type": "featured_description",
+      "name": "Description",
+      "limit": 1
+    },
+    {
+      "type": "ttco_before_after",
+      "name": "Before/After Slider",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "range",
+          "id": "start_position",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "label": "Starting slider position",
+          "default": 50
+        },
+        {
+          "type": "select",
+          "id": "aspect_ratio",
+          "label": "Aspect ratio",
+          "options": [
+            {
+              "value": "original",
+              "label": "Original"
+            },
+            {
+              "value": "square",
+              "label": "Square (1:1)"
+            },
+            {
+              "value": "landscape",
+              "label": "Landscape (4:3)"
+            },
+            {
+              "value": "portrait",
+              "label": "Portrait (3:4)"
+            }
+          ],
+          "default": "landscape"
+        },
+        {
+          "type": "select",
+          "id": "object_fit",
+          "label": "Image fit",
+          "options": [
+            {
+              "value": "cover",
+              "label": "Cover (fill container)"
+            },
+            {
+              "value": "contain",
+              "label": "Contain (fit inside)"
+            }
+          ],
+          "default": "cover"
+        },
+        {
+          "type": "text",
+          "id": "before_label_fallback",
+          "label": "Before label fallback",
+          "default": "Before"
+        },
+        {
+          "type": "text",
+          "id": "after_label_fallback",
+          "label": "After label fallback",
+          "default": "After"
+        }
+      ]
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Featured product"
+    },
+    {
+      "type": "text",
+      "id": "link_title",
+      "label": "Link title",
+      "default": "View details"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link URL",
+      "info": "If empty, the product URL is used."
+    },
+    {
+      "type": "header",
+      "content": "Layout options"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "standard",
+          "label": "Standard"
+        },
+        {
+          "value": "big_slider",
+          "label": "Big slider"
+        }
+      ],
+      "default": "standard"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA text",
+      "default": "Shop Now",
+      "info": "Only shown in big slider layout."
+    },
+    {
+      "type": "select",
+      "id": "media_position",
+      "label": "Media position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "paragraph",
+      "content": "Learn more about [media types](https://help.shopify.com/en/manual/products/product-media)"
+    },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Size",
+      "info": "Only applicable on desktop screens",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ],
+      "default": "small"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_image_zoom",
+      "label": "Enable image zoom",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_video_looping",
+      "label": "Enable video looping",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "zoom_effect",
+      "label": "Zoom effect",
+      "options": [
+        {
+          "value": "inside",
+          "label": "Inside"
+        },
+        {
+          "value": "outside",
+          "label": "Outside"
+        }
+      ],
+      "default": "outside"
+    },
+    {
+      "type": "select",
+      "id": "carousel_effect",
+      "label": "Transition effect",
+      "options": [
+        {
+          "value": "fade",
+          "label": "Fade"
+        },
+        {
+          "value": "slide",
+          "label": "Slide"
+        }
+      ],
+      "default": "fade"
+    }
+  ],
+  "presets": [
+    {
+      "category": "Products",
+      "name": "Featured product",
+      "blocks": [
+        {
+          "type": "product_meta",
+          "settings": {}
+        },
+        {
+          "type": "featured_description",
+          "settings": {}
+        },
+        {
+          "type": "variant_selector",
+          "settings": {}
+        },
+        {
+          "type": "buy_buttons",
+          "settings": {}
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

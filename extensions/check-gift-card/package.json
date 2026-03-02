@@ -1,0 +1,16 @@
+{
+  "name": "check-gift-card",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "shopify checkout-ui build",
+    "dev": "shopify checkout-ui dev"
+  },
+  "dependencies": {
+    "@shopify/ui-extensions": "latest",
+    "@shopify/ui-extensions-react": "latest",
+    "react": "18.x",
+    "react-dom": "18.x"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "product": {
+    "purchase_options": {
+      "one_time_purchase": "Jednorazový nákup",
+      "subscription": "Predplatné"
+    }
+  },
+  "policy": {
+    "description": "Možnosť kedykoľvek automaticky obnoviť, preskočiť alebo zrušiť.",
+    "policy_page_html": "<a href={{subscription_policy_url}} title='Zobraziť pravidlá predplatného'>Zobraziť pravidlá predplatného</a>"
+  },
+  "error": {
+    "quick_add_selling_plan_only_message": "Ak chcete produkt pridať do košíka, prejdite na jeho stránku a vyberte možnosť nákupu"
+  },
+  "no_subscriptions_warning_banner": {
+    "message": "Widget predplatného sa zobrazí len u produktov, ku ktorým je pripojený plán predplatného."
+  },
+  "no_app_block_found_banner": {
+    "message": "Ak chcete upraviť umiestnenie widgetu predplatného, pridajte nasledujúci fragment kódu do šablóny produktu na požadované miesto.",
+    "copy_button_text": "Kopírovať",
+    "copied_button_text": "Skopírované",
+    "button_text": "Zobraziť editor kódu"
+  }
+}

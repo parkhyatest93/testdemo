@@ -90,6 +90,7 @@
     "@graphql-codegen/cli": "5.0.3",
     "@graphql-codegen/introspection": "4.0.3",
     "@remix-run/eslint-config": "2.13.1",
+    "@shopify/cli": "^3.90.0",
     "@shopify/eslint-plugin": "46.0.0",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.0.1",

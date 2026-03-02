@@ -1,0 +1,478 @@
+{% liquid
+    assign product = block.settings.product
+
+    assign current_variant = product.selected_or_first_available_variant
+    assign subscription_url = product.metafields.custom.subscription_page_url.value.url
+    assign one_time_variant = product.metafields.custom.one_time_purchase_variant.value
+    assign total_measure = one_time_variant.unit_price_measurement.quantity_value | round
+    assign max_qty = product.metafields.custom.maximal_pruchase_quantity
+
+    assign default_variant = product.metafields.custom.default_variant.value
+
+%}
+
+    <div class="shopify_subscriptions_app_container default-app-block-new" data-section-id='{{ section.id }}'>
+        {% comment %}<script src="{{ 'app-block.js' | asset_url }}" defer></script>{% endcomment %}
+        <link href="{{ 'styles.css' | asset_url }}" rel='stylesheet' type="text/css" />
+
+            {% liquid
+                assign variantPrice = default_variant.price | money_with_currency | escape
+                assign variantComparedAtPrice = variant.compare_at_price | money_with_currency | escape
+            %}
+                <section data-variant-id='{{ one_time_variant.id }}'
+                         class='shopify_subscriptions_app_block'>
+                    <fieldset class="shopify_subscriptions_fieldset">
+
+                        {% if default_variant %}
+                            <div class="custom-sub-price">
+                  <span class="price-per-items">
+                    <strong>{{ total_measure }} Portionen</strong>
+                     ( <span class="price-per-item">
+                      {{ default_variant.unit_price | money }}
+                    </span>
+                    / Portion)
+                  </span>
+
+                                <span class="final-price">
+                    {% if default_variant.compare_at_price > default_variant.price %}
+                        <span class="old-price">
+                        {{ default_variant.compare_at_price | money }}
+                      </span>
+                    {% endif %}
+                    <span class="new-price">
+                      {{ default_variant.price | money }}
+                    </span>
+                    <span class="price-description">
+                      inkl. MwSt. zzgl. Versand
+                    </span>
+                  </span>
+                            </div>
+                        {% endif %}
+
+
+                        <div class="box-data-default-app-items">
+                            <div>
+                                    <div class='shopify_subscriptions_app_block_label'
+                                         style='border-bottom:{{ block.settings.border_thickness }}px solid {{ block.settings.dividers_color }};'>
+                                        <label>
+                                            <input
+                                                    aria-label='{{ 'product.purchase_options.one_time_purchase' | t }}. Product price {{ variantPrice }}'
+                                                    type='radio'
+                                                    checked
+                                                    name="purchaseOption_{{ section.id }}_{{ one_time_variant.id }}"
+                                                    id='{{ block.id }}_one_time_purchase'
+                                                    data-radio-type='one_time_purchase'
+                                                    data-variant-id='{{ one_time_variant.id }}'
+                                                    data-old-price='{{ one_time_variant.compare_at_price | money }}'
+                                                    data-new-price='{{ one_time_variant.price | money }}'
+                                                    data-per-item-price='{{ one_time_variant.unit_price | money }}'
+                                                    data-variant-price='{{ variantPrice }}'
+                                                    data-variant-compare-at-price='{{ variantComparedAtPrice }}'
+                                            />
+                                            {{ 'product.purchase_options.one_time_purchase' | t }}
+                                        </label>
+                                    </div>
+
+                            </div>
+                            <span
+                                    id='subscriptions_badge_text'
+                                    style='display: none;'
+                                    aria-hidden='true'>
+                              {{ 'product.purchase_options.subscription' | t }}
+                            </span>
+                        </div>
+                    </fieldset>
+                </section>
+
+    </div>
+    <input
+            name='selling_plan'
+            class='selected-selling-plan-id'
+            type='hidden'>
+    <span id="shopify_subscriptions_app_block_error_message"
+          class="shopify_subscriptions_app_block--hidden">{{ 'error.quick_add_selling_plan_only_message' | t }}</span>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log(window.location.href);
+    console.log(window.location.href.includes('daily-performance-sun-minimeals-mediashop'));
+
+    let addToCartButton = document.querySelector('.product--add-to-cart-button');
+    if (!addToCartButton) {
+      return;
+    }
+
+    addToCartButton.addEventListener('click', async function(e) {
+      let selectedRadio = document.querySelector('input[type="radio"][data-radio-type="selling_plan"]:checked');
+
+
+        let oneTimeRadio = document.querySelector('input[type="radio"][data-radio-type="one_time_purchase"]:checked');
+
+        if(!oneTimeRadio){
+          return;
+        }
+        e.preventDefault();
+
+        let hasMore = await checkQty(oneTimeRadio.dataset.variantId, {{ max_qty }});
+        if(hasMore){
+          return;
+        }
+
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            id: oneTimeRadio.dataset.variantId, // variant id
+            quantity: 1
+          }),
+          credentials: 'include'
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Add to cart failed');
+            return res.json();
+          })
+          .then(data => {
+
+            window.eventBus.emit('render:cart:drawer');
+            window.eventBus.emit('open:cart:drawer', {scrollToTop: true});
+
+             fetch('/cart.js', {headers: {'Cache-Control': 'no-store'}})
+              .then(r => r.json())
+              .then(cart => {
+                const n = cart.item_count || 0;
+                document.querySelectorAll('.cart-item-count-bubble')
+                  .forEach(el => {
+                    el.textContent = n;
+                    el.classList && el.classList.remove('hide', !n);
+                  });
+              })
+              .catch(console.error);
+
+             if (!window.location.href.includes('daily-performance-sun-minimeals-mediashop')) {
+              window.location.href = '/checkout';
+            }
+          })
+          .catch(err => {
+            console.error(err);
+          });
+
+    });
+  });
+
+  function updatePriceBox(el_target) {
+    document.querySelector('.final-price .old-price').innerHTML = el_target.dataset.oldPrice;
+    document.querySelector('.final-price .new-price').innerHTML = el_target.dataset.newPrice;
+    document.querySelector('.custom-sub-price .price-per-item').innerHTML = el_target.dataset.perItemPrice;
+  }
+
+  const container = document.querySelector('.shopify_subscriptions_fieldset');
+  if (container) {
+    const blockSel = '.shopify_subscriptions_app_block_label';
+    const radioSel = `${blockSel} input[type="radio"]`;
+
+    const clearAll = () => {
+      document.querySelectorAll(radioSel).forEach(r => { r.checked = false; r.removeAttribute('checked'); });
+      document.querySelectorAll(blockSel).forEach(b => b.classList.remove('active'));
+    };
+
+    const selectOnly = (radio) => {
+      clearAll();
+      radio.checked = true;
+      radio.setAttribute('checked','');
+      radio.closest(blockSel)?.classList.add('active');
+      if (typeof updatePriceBox === 'function') updatePriceBox(radio);
+      radio.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    container.addEventListener('click', (e) => {
+      const block = e.target.closest(blockSel);
+      if (!block) return;
+      if (e.target.matches('input[type="radio"]')) return;
+      const radio = block.querySelector('input[type="radio"]');
+      if (radio) selectOnly(radio);
+    });
+
+    container.addEventListener('change', (e) => {
+      const radio = e.target.closest('input[type="radio"]');
+      if (radio && e.target.matches(radioSel)) selectOnly(radio);
+    });
+  }
+
+
+
+</script>
+
+
+
+<style>
+
+    .product-single-wrapper.width--content{
+        max-width: 1005px;
+        margin: auto;
+    }
+
+    .shopify_subscriptions_app_block_label:not(.active) .more-info {
+        height: 0;
+        overflow: hidden;
+        position: absolute;
+    }
+
+    /*price box */
+
+    div[data-update-id="item-price"] {
+        display: none;
+    }
+
+    .custom-sub-price {
+        font-size: 15px;
+        display: flex;
+        margin-bottom: 30px;
+    }
+
+    .custom-sub-price .final-price {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .custom-sub-price span.price-per-items {
+        min-width: 210px;
+    }
+
+    .custom-sub-price .final-price .old-price {
+
+        text-decoration: line-through;
+        opacity: 0.4;
+    }
+
+    .custom-sub-price .final-price .price-description {
+        font-size: 11px;
+        width: 100%;
+        text-align: right;
+    }
+
+    .shopify_subscriptions_purchase_option_wrapper {
+        padding: 8px !important;
+        padding-left: 20px !important;
+        color: #004E42;
+    }
+
+    .shopify_subscriptions_purchase_option_wrapper label {
+        display: flex;
+        align-items: center;
+        font-size: 15px !important;
+    }
+
+    .shopify_subscriptions_app_block .shopify_subscriptions_app_block_label {
+        border-radius: 28px !important;
+        border: 1px solid #004E42 !important;
+        background-color: #FFFCF1;
+        cursor: pointer;
+    }
+
+    .shopify_subscriptions_app_block_label_children label {
+        display: flex;
+        align-items: center;
+    }
+
+    .shopify_subscriptions_app_block_label_children label p {
+        margin: 0;
+    }
+
+    .shopify_subscriptions_app_block_label_children label > .metafield-rich_text_field {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .shopify_subscriptions_app_block_label_children label .discount-text .metafield-rich_text_field p {
+        font-size: 10px;
+    }
+
+    .shopify_subscriptions_app_block_label_children label .discount-text {
+        padding: 6px;
+        background-color: #FAED9E;
+        border-radius: 14px;
+        margin-left: 50px;
+    }
+
+    .shopify_subscriptions_app_block_label_children li {
+        border: 0px solid #000;
+    }
+
+    .shopify_subscriptions_app_block_label_children li > .metafield-rich_text_field {
+        font-size: 14px;
+        color: #004E42;
+        margin-top: 15px;
+    }
+
+    .shopify_subscriptions_app_block_label_children li > .metafield-rich_text_field ul li {
+        position: relative;
+        font-family: 'Figtree';
+    }
+
+    .shopify_subscriptions_app_block_label_children .more-info li::before {
+        content: "";
+        display: block;
+        width: 15px;
+        height: 15px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16.874' height='16.874' viewBox='0 0 16.874 16.874'%3E%3Cg transform='translate(-213.248 -1229.248)'%3E%3Cg transform='translate(213.998 1229.998)'%3E%3Cpath d='M19.874,12.187a7.687,7.687,0,1,0-7.687,7.687A7.689,7.689,0,0,0,19.874,12.187Z' transform='translate(-4.5 -4.5)' fill='none' stroke='%23004e42' stroke-width='1.5'/%3E%3Cpath d='M19.707,12.375l-5.92,7.047L11.25,16.6' transform='translate(-7.791 -8.212)' fill='none' stroke='%23004e42' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
+
+    .shopify_subscriptions_app_block_label_children .more-info .metafield-rich_text_field ul li {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .shopify_subscriptions_app_block_label_children .more-info .metafield-rich_text_field ul {
+        padding-left: 25px;
+    }
+
+    .shopify_subscriptions_purchase_option_wrapper label input {
+        accent-color: #004E42;
+    }
+
+    .shopify_subscriptions_purchase_option_wrapper:not(.shopify_subscriptions_app_block_label) > label {
+        background-color: #FFFCF1;
+        color: var(--text-color);
+    }
+
+    .shopify_subscriptions_app_block_label input[type=radio]:checked:before {
+        background: #004E42;
+    }
+
+    .shopify_subscriptions_fieldset .shopify_subscriptions_app_block_label input[type=radio]:checked {
+        border-color: #004E42 !important;
+    }
+
+    #MainContent .shopify-section:first-child {
+        background: transparent linear-gradient(197deg, #fef8d2 0%, #fffdf6 100%) 0% 0% no-repeat padding-box;
+    }
+
+    #MainContent .wrapper-spacing--h {
+        padding-left: 0;
+        padding-right: 0;
+    }
+</style>
+
+<style>
+    {{ block.settings.custom_css }}
+</style>
+
+
+{% schema %}
+{
+  "name": "widget app-block-new",
+  "target": "section",
+  "enabled_on": {
+    "templates": [
+      "product",
+      "page"
+    ]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:settings.description"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.colors_title"
+    },
+    {
+      "type": "color",
+      "id": "color_text_title",
+      "label": "t:settings.colors_text_title",
+      "default": "#6D7175"
+    },
+    {
+      "type": "color",
+      "id": "color_text_body",
+      "label": "t:settings.colors_text_body",
+      "default": "#6D7175"
+    },
+    {
+      "type": "color",
+      "id": "dividers_color",
+      "label": "t:settings.colors_dividers",
+      "default": "#8F8D8D"
+    },
+    {
+      "type": "color",
+      "id": "bacgkround_color",
+      "label": "t:settings.colors_background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.border_title"
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "t:settings.border_thickness",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "t:settings.border_radius",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:settings.supporting_text_title"
+    },
+    {
+      "type": "text",
+      "id": "supporting_text_title",
+      "label": "t:settings.supporting_text_subtitle",
+      "default": "Purchase options",
+      "placeholder": "t:settings.supporting_text_input_default"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.subscription_policy_title"
+    },
+    {
+      "type": "url",
+      "id": "subscription_policy_url",
+      "label": "t:settings.subscription_policy_url",
+      "info": "t:settings.subscription_policy_url_info"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.product_title"
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "t:settings.product_title",
+      "info": "t:settings.product_description",
+      "autofill": true
+    },
+    {
+      "type": "textarea",
+      "id": "custom_css",
+      "label": "custom css"
+    },
+  ]
+}
+{% endschema %}

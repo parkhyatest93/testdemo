@@ -1,0 +1,198 @@
+{% liquid
+    assign product = block.settings.product
+    assign current_variant = product.selected_or_first_available_variant
+%}
+
+{% if product.selling_plan_groups.size > 0 %}
+    <div class="shopify_subscriptions_app_container" data-section-id='{{ section.id }}'>
+        <script src="{{ 'app-block.js' | asset_url }}" defer></script>
+        <link href="{{ 'styles.css' | asset_url }}" rel='stylesheet' type="text/css"/>
+        {% for variant in product.variants %}
+            {%liquid
+                assign variantPrice = variant.price | money_with_currency | escape
+                assign variantComparedAtPrice = variant.compare_at_price | money_with_currency | escape
+            %}
+            {% if variant.selling_plan_allocations.size > 0 %}
+                <section data-variant-id='{{ variant.id }}' class='shopify_subscriptions_app_block {% if variant.id != current_variant.id %}shopify_subscriptions_app_block--hidden{% endif %}'>
+                    <fieldset class="shopify_subscriptions_fieldset">
+                        <div style='border-color:{{ block.settings.dividers_color }}; border-width: {{ block.settings.border_thickness }}px; border-style: solid; background: {{ block.settings.bacgkround_color }}; border-radius: {{ block.settings.border_radius }}px; color: {{ block.settings.color_text_body }};'>
+                            {% unless product.requires_selling_plan %}
+                                <div class='shopify_subscriptions_app_block_label shopify_subscriptions_purchase_option_wrapper' style='border-bottom:{{ block.settings.border_thickness }}px solid {{ block.settings.dividers_color }};'>
+                                    <label>
+                                        <input
+                                                aria-label='{{ 'product.purchase_options.one_time_purchase' | t }}. Product price {{ variantPrice }}'
+                                                type='radio'
+                                                name="purchaseOption_{{ section.id }}_{{ variant.id }}"
+                                                {% if variant.available == false %}disabled{% endif %}
+                                                id='{{ block.id }}_one_time_purchase'
+                                                data-radio-type='one_time_purchase'
+                                                data-variant-id='{{ variant.id }}'
+                                                data-variant-price='{{ variantPrice }}'
+                                                data-variant-compare-at-price='{{ variantComparedAtPrice }}'
+                                                checked
+                                        />
+                                        {{ 'product.purchase_options.one_time_purchase' | t }}
+                                    </label>
+                                    <div class='shopify_subscriptions_in_widget_price shopify_subscriptions_app_block--hidden'>{{ variant.price | money_with_currency }}</div>
+                                </div>
+                            {% endunless %}
+                            {% assign group_ids = variant.selling_plan_allocations | map: 'selling_plan_group_id' | uniq %}
+                            {% for group_id in group_ids %}
+                                {%liquid
+                                    assign group = product | map: 'selling_plan_groups' | where: 'id', group_id | first
+                                    assign allocations = variant | map: 'selling_plan_allocations' | where: 'selling_plan_group_id', group_id
+
+                                    if forloop.first
+                                        assign first_selling_plan_group = true
+                                    else
+                                        assign first_selling_plan_group = false
+                                    endif
+                                %}
+                                <div class='shopify_subscriptions_app_block_label' style='border-bottom:{{ block.settings.border_thickness }} solid {{ block.settings.dividers_color }};'>
+                                    <div class='shopify_subscriptions_purchase_option_wrapper'>
+                                        <label>{{ group.name }}</label>
+                                        <div class='shopify_subscriptions_in_widget_price allocation_price shopify_subscriptions_app_block--hidden' id='{{ block.id }}_{{ group_id }}_{{ variant.id }}_allocation_price'>{{ allocations.first.price | money_with_currency }}</div>
+                                    </div>
+                                    <ul class='shopify_subscriptions_app_block_label_children'>
+                                        {% for allocation in allocations %}
+
+                                            {%liquid
+                                                if forloop.first and product.requires_selling_plan and first_selling_plan_group
+                                                    assign plan_checked = 'checked'
+                                                else
+                                                    assign plan_checked = nil
+                                                endif
+
+                                                assign allocationPrice = allocation.price | money_with_currency | escape
+                                                assign allocationComparedAtPrice = allocation.compare_at_price | money_with_currency | escape
+                                            %}
+
+                                            <li>
+                                                <label>
+                                                    <input
+                                                            type='radio'
+                                                            {% if variant.available == false %}disabled{% endif %}
+                                                            aria-label='{{ allocation.selling_plan.name }}. Product price {{ allocationPrice }}'
+                                                            name="purchaseOption_{{ section.id }}_{{ variant.id }}"
+                                                            data-radio-type='selling_plan'
+                                                            data-selling-plan-id='{{ allocation.selling_plan.id }}'
+                                                            data-selling-plan-group-id='{{ block.id }}_{{ group_id }}_{{ variant.id }}'
+                                                            data-selling-plan-adjustment='{{ allocation.selling_plan.price_adjustments.size }}'
+                                                            data-variant-price='{{ allocationPrice }}'
+                                                            data-variant-compare-at-price='{{ allocationComparedAtPrice }}'
+                                                            {{ plan_checked }}>
+                                                    {{ allocation.selling_plan.name }}
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <span
+                                id='subscriptions_badge_text'
+                                style='display: none;'
+                                aria-hidden='true'>
+              {{ 'product.purchase_options.subscription' | t }}
+            </span>
+                        <p class='shopify_subscriptions_app_policy'>
+                            {{ 'policy.description' | t }}
+                            {% if block.settings.subscription_policy_url %}
+                                {{ 'policy.policy_page_html' | t: subscription_policy_url: block.settings.subscription_policy_url }}
+                            {% endif %}
+                        </p>
+                    </fieldset>
+                </section>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <input
+            name='selling_plan'
+            class='selected-selling-plan-id'
+            type='hidden'>
+    <span id="shopify_subscriptions_app_block_error_message" class="shopify_subscriptions_app_block--hidden">{{ 'error.quick_add_selling_plan_only_message' | t }}</span>
+{% else %}
+    {% if request.design_mode %}
+        <div class="shopify_subscriptions_warning_banner">
+            <link href="{{ 'styles.css' | asset_url }}" rel='stylesheet' type="text/css"/>
+            <div class="shopify_subscriptions_warning_banner_icon">
+                icon
+            </div>
+            <p class="shopify_subscriptions_warning_banner_text">{{ 'no_subscriptions_warning_banner.message' | t }}</p>
+        </div>
+    {% endif %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "fresh-default-app",
+  "target": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:settings.description"
+    },
+    {
+      "type": "header",
+      "content": "t:settings.colors_title"
+    },
+    {
+      "type": "color",
+      "id": "color_text_body",
+      "label": "t:settings.colors_text_body",
+      "default": "#6D7175"
+    }, {
+      "type": "color",
+      "id": "dividers_color",
+      "label": "t:settings.colors_dividers",
+      "default": "#8F8D8D"
+    }, {
+      "type": "color",
+      "id": "bacgkround_color",
+      "label": "t:settings.colors_background",
+      "default": "#FFFFFF"
+    }, {
+      "type": "header",
+      "content": "t:settings.border_title"
+    }, {
+      "type": "range",
+      "id": "border_thickness",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "t:settings.border_thickness",
+      "default": 1
+    }, {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "label": "t:settings.border_radius",
+      "default": 0
+    }, {
+      "type": "header",
+      "content": "t:settings.subscription_policy_title"
+    }, {
+      "type": "url",
+      "id": "subscription_policy_url",
+      "label": "t:settings.subscription_policy_url",
+      "info": "t:settings.subscription_policy_url_info"
+    }, {
+      "type": "header",
+      "content": "t:settings.product_title"
+    }, {
+      "type": "product",
+      "id": "product",
+      "label": "t:settings.product_title",
+      "info": "t:settings.product_description",
+      "autofill": true
+    }
+  ]
+}
+{% endschema %}

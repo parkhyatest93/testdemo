@@ -1,0 +1,24 @@
+{
+  "product": {
+    "purchase_options": {
+      "one_time_purchase": "Achiziție unică",
+      "subscription": "Abonament"
+    }
+  },
+  "policy": {
+    "description": "Se reînnoiește automat; poți omite sau anula oricând.",
+    "policy_page_html": "<a href={{subscription_policy_url}} title='Vezi politica de abonare'>Vezi politica de abonare</a>"
+  },
+  "error": {
+    "quick_add_selling_plan_only_message": "Pentru a adăuga în coș, accesează pagina produsului și selectează o opțiune de cumpărare"
+  },
+  "no_subscriptions_warning_banner": {
+    "message": "Widgetul de abonament va fi afișat doar în cazul produselor care dispun de un plan de abonament."
+  },
+  "no_app_block_found_banner": {
+    "message": "Pentru a edita plasarea widgetului de abonament, adăugați următorul fragment de cod la șablonul produsului, în locul dorit.",
+    "copy_button_text": "Copiere",
+    "copied_button_text": "Copiat",
+    "button_text": "Vizualizarea editorului de cod"
+  }
+}
